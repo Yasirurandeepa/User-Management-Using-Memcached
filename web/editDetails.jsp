@@ -34,7 +34,6 @@
 
     String index = request.getParameter("index");
     int selectedIndex = Integer.parseInt(index)-1;
-    System.out.println(selectedIndex);
 
 %>
 

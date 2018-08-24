@@ -21,7 +21,10 @@ public class crud extends HttpServlet{
     ResultSet rs = null;
     int row = 0;
 
-    MemcachedClient mcc;
+    long castToken;
+
+
+    public MemcachedClient mcc;
 
     public crud() throws IOException{
         mcc = new MemcachedClient (new
@@ -40,7 +43,6 @@ public class crud extends HttpServlet{
         if(action.equals("insert")){
             int row = this.insertData(fname, lname, email);
             if(row>0){
-                this.getRecords();
                 response.sendRedirect("home.jsp");
             }
         }else if(action.equals("update")){
@@ -48,11 +50,10 @@ public class crud extends HttpServlet{
             int id = Integer.parseInt(uid);
 
             String index = request.getParameter("index");
-            int selectedIndex = Integer.parseInt(index);
+            int selectedIndex = Integer.parseInt(index)-1;
 
             int row = this.updateData(fname, lname, email, id, selectedIndex);
             if(row>0){
-                this.getRecords();
                 response.sendRedirect("home.jsp");
             }
         }
@@ -66,7 +67,7 @@ public class crud extends HttpServlet{
         String index = request.getParameter("index");
 
         int id = Integer.parseInt(uid);
-        int user_index = Integer.parseInt(index);
+        int user_index = Integer.parseInt(index)-1;
 
         String action = request.getParameter("check");
 
@@ -75,7 +76,6 @@ public class crud extends HttpServlet{
             if(action.equals("delete")){
                 int row = this.deleteRecord(id, user_index);
                 if(row>0){
-                    this.getRecords();
                     response.sendRedirect("home.jsp");
                 }
             }else{
@@ -100,7 +100,7 @@ public class crud extends HttpServlet{
 
             row = ps.executeUpdate();
 
-            String query_id = "SELECT MAX(uid) from newtable";
+            String query_id = "SELECT MAX(uid) as uid from newtable";
             ResultSet rs = this.executeQuery(query_id);
             while (rs.next()){
                 id = rs.getInt("uid");
@@ -153,7 +153,6 @@ public class crud extends HttpServlet{
                 obj.add(user);
             }
             mcc.set("userObjects", 900, obj);
-            System.out.println(obj);
             mcc = new MemcachedClient (new
                     InetSocketAddress("127.0.0.1", 11211));
             // Connecting to Memcached server on localhost
@@ -162,17 +161,10 @@ public class crud extends HttpServlet{
             }
             mcc.set("userObjects", 900, obj);
 
-
         }catch(Exception ex){
             System.out.println(ex);
         }
 
-    }
-
-    public ResultSet getRecord(int id){
-        String query = "SELECT * FROM newtable where uid = '"+id+"'";
-        ResultSet resultSet = this.executeQuery(query);
-        return resultSet;
     }
 
     public int deleteRecord(int id, int index){
@@ -187,6 +179,7 @@ public class crud extends HttpServlet{
             Object users = mcc.get("userObjects");
             ArrayList<UserEntity> userList = (ArrayList)users;
             userList.remove(index);
+            mcc.set("userObjects",900, userList);
 
         }catch (Exception ex){
             ex.printStackTrace();

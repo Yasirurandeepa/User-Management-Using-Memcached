@@ -35,12 +35,17 @@
 <body>
 
 <%
-    MemcachedClient mcc = new MemcachedClient(new
-            InetSocketAddress("127.0.0.1", 11211));
+//    MemcachedClient mcc = new MemcachedClient(new
+//            InetSocketAddress("127.0.0.1", 11211));
+
     crud obj = new crud();
+    MemcachedClient mcc = obj.mcc;
+
+
     if(mcc.get("userObjects")==null) {
         obj.getRecords();
     }
+
 %>
 <div class="container bg-light" style="padding-top: 20px; padding-bottom: 20px;">
 
@@ -99,7 +104,9 @@
                 <%
 
                     try{
+
                         Object users = mcc.get("userObjects");
+
                         ArrayList<UserEntity> userList = (ArrayList)users;
                         int i = 0;
 
@@ -110,7 +117,7 @@
 
                 %>
                 <tr>
-                    <td><%=user.getUserID()%><%=user.getFirstname()%></td>
+                    <td><%=user.getUserID()%>.<%=user.getFirstname()%></td>
                     <td><%=user.getLname()%></td>
                     <td><%=user.getEmail()%></td>
                     <td>
